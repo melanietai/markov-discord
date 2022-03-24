@@ -2,7 +2,8 @@
 
 import sys
 from random import choice
-
+import os
+import discord
 
 def open_and_read_file(filenames):
     """Take list of files. Open them, read them, and return one long string."""
@@ -55,12 +56,35 @@ def make_text(chains):
     return ' '.join(words)
 
 
-# Get the filenames from the user through a command line prompt, ex:
-# python markov.py green-eggs.txt shakespeare.txt
-filenames = sys.argv[1:]
 
-# Open the files and turn them into one long string
-text = open_and_read_file(filenames)
+client = discord.Client()
 
-# Get a Markov chain
-chains = make_chains(text)
+@client.event
+async def on_ready():
+    print(f'Successfully connected! Logged in as {client.user}.')
+
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    # TODO: replace this with your code
+    # Get the filenames from the user through a command line prompt, ex:
+    # python markov.py green-eggs.txt shakespeare.txt
+    filenames = sys.argv[1:]
+
+    # Open the files and turn them into one long string
+    text = open_and_read_file(filenames)
+
+    # Get a Markov chain
+    chains = make_chains(text)
+
+    text = make_text(chains)
+
+    
+    if message.content.startswith('$markov'):
+        await message.channel.send(text)
+
+
+client.run(os.environ['DISCORD_TOKEN'])
